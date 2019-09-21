@@ -1,0 +1,2 @@
+aws deploy create-deployment --application-name csye6225-webapp --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name csye6225-webapp-deployment --s3-location bucket=code-deploy.csye6225-spring2019-dandekars.me,bundleType=zip,key=application.zip
+

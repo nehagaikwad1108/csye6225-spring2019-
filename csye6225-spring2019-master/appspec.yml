@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+
+files:
+  - source: restapi.jar
+    destination: /var
+  - source: amazon-cloudwatch-agent.json
+    destination: /opt/aws/amazon-cloudwatch-agent/etc/  
+
+hooks:
+  AfterInstall:
+   - location: ./startApplication.sh
+     timeout: 180
+     runas: centos

@@ -1,0 +1,117 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Parameters" : {
+	"StackName": {
+            "Type": "String",
+	    "Description" : "Please enter string for stack name"
+         }   
+   },
+   "Resources" : {
+	 "myvpcstack" : {
+         "Type" : "AWS::EC2::VPC",
+         "Properties" : {
+            "CidrBlock" : "10.0.0.0/16",
+    	    "EnableDnsSupport" : "true",
+    	    "EnableDnsHostnames" : "true",
+	    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : [ "-", [ {"Ref" : "StackName" }, "csye6225-vpc"]]}}]
+         }
+      },
+      "mySubnet1" : {
+         "Type" : "AWS::EC2::Subnet",
+         "Properties" : {
+            "VpcId" : { "Ref" : "myvpcstack" },
+            "CidrBlock" : "10.0.1.0/24",
+            "AvailabilityZone" : "us-east-1a",
+	    "Tags" : [{"Key" : "Name", "Value" : "subnet1" }]
+         }
+      },
+      "mySubnet2" : {
+         "Type" : "AWS::EC2::Subnet",
+         "Properties" : {
+            "VpcId" : { "Ref" : "myvpcstack" },
+            "CidrBlock" : "10.0.2.0/24",
+            "AvailabilityZone" : "us-east-1b",
+	    "Tags" : [{"Key" : "Name", "Value" : "subnet2" }]
+         }
+      },
+      "mySubnet3" : {
+         "Type" : "AWS::EC2::Subnet",
+         "Properties" : {
+            "VpcId" : { "Ref" : "myvpcstack" },
+            "CidrBlock" : "10.0.3.0/24",
+            "AvailabilityZone" : "us-east-1c",
+	    "Tags" : [{"Key" : "Name", "Value" : "subnet3" }]
+         }
+      },
+      "myInternetGateway" : {
+         "Type" : "AWS::EC2::InternetGateway"
+      },
+      "AttachGateway" : {
+  	 "Type" : "AWS::EC2::VPCGatewayAttachment",
+   	 "Properties" : {
+      	    "VpcId" : { "Ref" : "myvpcstack" },
+            "InternetGatewayId" : { "Ref" : "myInternetGateway" }
+   	 }
+     },
+     "myRouteTable" : {
+         "Type" : "AWS::EC2::RouteTable",
+         "Properties" : {
+            "VpcId" : { "Ref" : "myvpcstack" },
+	    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : [ "-", [ {"Ref" : "StackName" } , "csye6225-rt"]]}}]
+
+         }
+      },
+      "mySubnet1RouteTableAssociation" : {
+         "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+         "Properties" : {
+            "SubnetId" : { "Ref" : "mySubnet1" },
+            "RouteTableId" : { "Ref" : "myRouteTable" }
+         }
+      },
+      "mySubnet2RouteTableAssociation" : {
+         "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+         "Properties" : {
+            "SubnetId" : { "Ref" : "mySubnet2" },
+            "RouteTableId" : { "Ref" : "myRouteTable" }
+         }
+      },
+      "mySubnet3RouteTableAssociation" : {
+         "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+         "Properties" : {
+            "SubnetId" : { "Ref" : "mySubnet3" },
+            "RouteTableId" : { "Ref" : "myRouteTable" }
+         }
+      },
+      "myRoute" : {
+         "Type" : "AWS::EC2::Route",
+	 "DependsOn" : "AttachGateway",
+         "Properties" : {
+            "RouteTableId" : { "Ref" : "myRouteTable" },
+            "DestinationCidrBlock" : "0.0.0.0/0",
+            "GatewayId" : { "Ref" : "myInternetGateway" }
+         }
+      }
+   },
+   "Outputs" : {
+    "VPCId" : {
+      "Description" : "VPC ID",
+      "Value" :  { "Ref" : "myvpcstack" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-VPCID" }}
+    },
+    "PublicSubnet" : {
+      "Description" : "The subnet ID to use for public web servers",
+      "Value" :  { "Ref" : "mySubnet1" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SubnetID" }}
+    },
+    "DBPublicSubnet1" : {
+      "Description" : "The subnet ID to use for public DB servers",
+      "Value" :  { "Ref" : "mySubnet2" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-DBSubnetID1" }}
+    },
+    "DBPublicSubnet2" : {
+      "Description" : "The subnet ID to use for public DB servers",
+      "Value" :  { "Ref" : "mySubnet3" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-DBSubnetID2" }}
+    }
+  }
+}     
